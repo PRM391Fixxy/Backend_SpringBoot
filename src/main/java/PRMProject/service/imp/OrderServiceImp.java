@@ -93,11 +93,13 @@ public class OrderServiceImp implements OrderService {
             Order order = Order.builder().customer(user).address(requestOrderDTO.getAddress())
                     .workDescription(workDescription).build();
 
-            orderRepository.save(order);
+            order = orderRepository.save(order);
 
-            OrderDTO dto = OrderDTO.builder().orderId(order.getId())
+            OrderDTO dto = OrderDTO.builder().orderId(order.getId()).
+                    address(order.getAddress())
                     .description(order.getWorkDescription().getDescription())
-                    .customerPhone(order.getCustomer().getPhone()).build();
+                    .customerPhone(order.getCustomer().getPhone())
+                    .build();
 
             DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("/");
             dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -131,7 +133,7 @@ public class OrderServiceImp implements OrderService {
     }
 
     @Override
-    public Order acceptOrder(long orderId) throws Exception {
+    public Order acceptOrder(Long orderId) throws Exception {
         try {
             Order rs = null;
             log.info("accept Order Service");
@@ -143,9 +145,9 @@ public class OrderServiceImp implements OrderService {
             User worker = userRepository.findUserByUsername(JWTVerifier.USERNAME);
 
             order.setWorker(worker);
-            orderRepository.save(order);
+            rs = orderRepository.save(order);
 
-            sendNotification(order.getCustomer().getDeviceId(), "we found a worker");
+//            sendNotification(order.getCustomer().getDeviceId(), "we found a worker");
 
             return rs;
         } finally {
@@ -164,7 +166,7 @@ public class OrderServiceImp implements OrderService {
         bodyStr.append(" \"orderId\":" + orderDTO.getOrderId() + ",");
         bodyStr.append(" \"description\":" + " \" " + orderDTO.getDescription() + "\"");
         bodyStr.append("\"price\":" + orderDTO.getPrice());
-        bodyStr.append("\"Customer Phone\":" + "\"" + orderDTO.getCustomerPhone() + "\"");
+        bodyStr.append("\"customerPhone\":" + "\"" + orderDTO.getCustomerPhone() + "\"");
         bodyStr.append("},");
         StringBuilder json = new StringBuilder();
         json.append("{\n" +

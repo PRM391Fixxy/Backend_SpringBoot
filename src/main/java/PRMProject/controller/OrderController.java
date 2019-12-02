@@ -3,8 +3,10 @@ package PRMProject.controller;
 
 import PRMProject.entity.Order;
 import PRMProject.model.RequestOrderDTO;
+import PRMProject.model.ResponseDTO;
 import PRMProject.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,15 +67,22 @@ public class OrderController {
         return null;
     }
 
-    @PutMapping
-    public ResponseEntity acceptOrder(long orderId) {
+    @PutMapping(value = "/{orderID}")
+    public ResponseEntity<ResponseDTO> acceptOrder(@PathVariable Long orderID) {
         try {
             log.info("requestOrder");
-            Order rs = orderService.acceptOrder(orderId);
-            return ResponseEntity.ok(rs);
+            Order rs = orderService.acceptOrder(orderID);
+            return ResponseEntity.ok(
+                    ResponseDTO.builder()
+                            .message("success")
+                            .status(200)
+                            .build());
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("This Order not avaiable");
+            return ResponseEntity.status(HttpStatus.SC_BAD_REQUEST).body( ResponseDTO.builder()
+                    .message("this order is not avaiable")
+                    .status(400)
+                    .build());
         } finally {
             log.info("requestOrder");
         }
