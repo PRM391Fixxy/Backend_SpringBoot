@@ -18,7 +18,7 @@ public interface UserService {
 
     List<Order> getOrderByUsername(String username);
 
-    User saveDeviceId(String deviceId);
+    void saveDeviceId(String deviceId);
 
     void update(Long id, UserDto userDto);
 

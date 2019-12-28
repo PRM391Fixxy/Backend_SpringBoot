@@ -129,9 +129,9 @@ public class UserController {
         try {
             log.info("saveDeviceId");
 
-            User user = userService.saveDeviceId(deviceDTO.getDeviceId());
+            userService.saveDeviceId(deviceDTO.getDeviceId());
 
-            return new ResponseEntity(user, HttpStatus.OK);
+            return ResponseEntity.ok().build();
         } finally {
             log.info("saveDeviceId");
         }

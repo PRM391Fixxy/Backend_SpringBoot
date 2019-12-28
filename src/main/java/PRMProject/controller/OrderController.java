@@ -3,6 +3,7 @@ package PRMProject.controller;
 
 import PRMProject.constant.Constant;
 import PRMProject.entity.Order;
+import PRMProject.model.AcceptOrderDTO;
 import PRMProject.model.FeedbackOrderDTO;
 import PRMProject.model.OrderDTO;
 import PRMProject.model.OrderResultDTO;
@@ -71,10 +72,10 @@ public class OrderController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity acceptOrder(@PathVariable Long id) {
+    public ResponseEntity acceptOrder(@PathVariable Long id, @RequestBody AcceptOrderDTO acceptOrderDTO) {
         try {
             log.info("requestOrder");
-            Order rs = orderService.acceptOrder(id);
+            Order rs = orderService.acceptOrder(id, acceptOrderDTO.getWorkerId());
             return ResponseEntity.ok(rs);
         } catch (Exception e) {
             e.printStackTrace();

@@ -124,10 +124,11 @@ public class OrderServiceImp implements OrderService {
             //dto for send notification
             OrderDTO dto = OrderDTO.builder().orderId(order.getId()).address(order.getAddress())
                     .description(order.getWorkDescription().getDescription())
-                    .customerPhone(user.getPhone())
-                    .addressDetail(requestOrderDTO.getDetailAddress())
+                    .nameDevice(order.getNameDevice())
+                    .customerId(user.getId())
                     .coords(new Coords(requestOrderDTO.getCoords().getLatitude(), requestOrderDTO.getCoords().getLongitude()))
                     .deviceId(user.getDeviceId())
+                    .notificationType(Constant.NOTIFICATION_TYPE_REQEST)
                     .build();
 
             DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("/");
@@ -158,7 +159,7 @@ public class OrderServiceImp implements OrderService {
     }
 
     @Override
-    public Order acceptOrder(Long orderId) throws Exception {
+    public Order acceptOrder(Long orderId, Long workerId) throws Exception {
         try {
             Order rs = null;
             log.info("accept Order Service");
@@ -168,12 +169,17 @@ public class OrderServiceImp implements OrderService {
                 throw new Exception();
             }
 
-            User worker = userRepository.findUserByUsernameIgnoreCase(JWTVerifier.USERNAME);
+            User worker = userRepository.getOne(workerId);
 
+            order.setStatus(Constant.STATUS_PROCESSING);
             order.setWorker(worker);
             orderRepository.save(order);
 
-//            sendNotification(worker.getDeviceId(), "we found a worker");
+            if(worker.getDeviceId() == null) {
+                throw new Exception();
+            }
+
+            sendNotification(worker.getDeviceId(), new NotificationCompleteDTO(Constant.NOTIFICATION_TYPE_ACCEPT));
 
             return rs;
         } finally {
@@ -225,13 +231,12 @@ public class OrderServiceImp implements OrderService {
         String token = "ExponentPushToken[" + deviceId + "]";
         HttpPost post = new HttpPost("https://expo.io/--/api/v2/push/send");
         StringBuilder bodyStr = new StringBuilder();
-        OrderDTO orderDTO = (OrderDTO) data;
         StringBuilder json = new StringBuilder();
         json.append("{\n" +
                 "\"to\":\"" + token + "\"," +
                 " \"title\":\"Thanh Dep Trai Notification\",\"subtitle\":\"Tao la so 1\",\"body\":\"Dep trai hoc gioi " +
                 "con nha giau va da tai\",\"data\":" +
-                new ObjectMapper().writeValueAsString(orderDTO) + ",\"category\":\"asd\"}");
+                new ObjectMapper().writeValueAsString(data) + ",\"category\":\"asd\"}");
         log.info(json.toString());
 
         post.setEntity(new StringEntity(json.toString()));

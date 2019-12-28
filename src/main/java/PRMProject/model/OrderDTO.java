@@ -17,9 +17,10 @@ import java.math.BigDecimal;
 public class OrderDTO {
 
     private long orderId;
+    private String nameDevice;
     private String description;
     private BigDecimal price;
-    private String customerPhone;
+    private Long customerId;
     private String address;
     private String addressDetail;
     private Coords coords;

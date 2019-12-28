@@ -137,16 +137,14 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public User saveDeviceId(String deviceId) {
+    public void saveDeviceId(String deviceId) {
         try {
             log.info("saveDeviceId");
             User user = userRepository.findUserByUsernameIgnoreCase(JWTVerifier.USERNAME);
-            User rs;
             if (user != null) {
                 user.setDeviceId(deviceId);
-                rs = userRepository.save(user);
+                userRepository.save(user);
             }
-            return user;
         } finally {
             log.info("saveDeviceId");
         }
